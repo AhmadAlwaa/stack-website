@@ -1,0 +1,15 @@
+*{
+    user-select: none;
+}
+.border{
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+    border: 2px dashed rgb(71, 138, 231);
+    background-color: rgba(0, 51, 161, 0.084);
+    padding-left: 10vw;
+    padding-right: 10vw;
+    padding-top: 45px;
+    padding-bottom: 45px;
+    
+}

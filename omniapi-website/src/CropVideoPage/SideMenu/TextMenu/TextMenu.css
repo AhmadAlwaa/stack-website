@@ -1,0 +1,97 @@
+/* === Base Button Styles === */
+.FsMenu {
+  color: rgba(231, 252, 253, 1) !important;
+  border: 1px solid rgba(123, 250, 233, 0.3) !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  text-transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 40px !important;
+  transition: all 0.3s ease-in-out !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+.FsMenu:focus { 
+  outline:none
+}
+
+.FsMenu:hover {
+  border-color: rgba(136, 255, 239, 0.8) !important;
+  background-color: rgba(40, 70, 90, 0.9) !important;
+  box-shadow: 0 0 0px rgba(136, 255, 239, 0.4) !important;
+}
+
+/* === Menu Base Styling === */
+.MuiMenu-paper {
+  background: rgba(25, 38, 50, 0.9) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(136, 255, 239, 0.2) !important;
+  box-shadow: 0 0px 0px rgba(0, 255, 221, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  padding: 4px 0 !important;
+  overflow: hidden !important;
+}
+
+/* === Menu List === */
+.MuiMenu-list {
+  background: transparent !important;
+  max-height: 220px !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+}
+
+/* Custom Scrollbar */
+.MuiMenu-list::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.MuiMenu-list::-webkit-scrollbar-thumb {
+  background: rgba(94, 140, 180, 0.6) !important;
+  border-radius: 8px !important;
+  transition: background 0.2s ease;
+}
+
+.MuiMenu-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(136, 255, 239, 0.9) !important;
+}
+
+.MuiMenu-list::-webkit-scrollbar-track {
+  background: rgba(30, 45, 60, 0.7) !important;
+}
+
+/* === MenuItem Styles === */
+.MuiMenuItem-root {
+  color: rgba(230, 255, 255, 0.9) !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  margin: 2px 8px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: rgba(50, 90, 100, 0.8) !important;
+  color: rgba(136, 255, 239, 1) !important;
+  box-shadow: 0 0 0px rgba(0, 255, 221, 0.2) !important;
+  transform: scale(1.03) !important;
+}
+
+/* === Color Wheel Container === */
+.MuiMenuItem-root .ColorWheel,
+.MuiMenuItem-root > div {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* === Responsive Buttons === */
+@media (min-width: 900px) {
+  .FsMenu {
+    height: 45px !important;
+    font-size: 15px !important;
+  }
+}

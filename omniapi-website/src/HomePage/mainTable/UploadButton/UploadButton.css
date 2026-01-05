@@ -1,0 +1,15 @@
+.Button{
+    background-color: rgba(80, 3, 189, 0.871);
+    display: flex;
+    align-items: center;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 5px;
+    font-size: 20px;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.Button:hover{
+    background-color: rgba(129, 59, 227, 0.871);
+}

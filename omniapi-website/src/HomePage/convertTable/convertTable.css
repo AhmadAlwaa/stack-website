@@ -1,0 +1,13 @@
+.table{
+    border: 3px solid #7fe5ff;
+    border-radius: 0px;
+    border-top-Right-radius: 5px;
+
+} 
+
+.cell{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    color: aliceblue;
+}

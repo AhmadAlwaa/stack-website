@@ -1,0 +1,26 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    width: 100vw;
+}
+
+
+.downloadPage{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    width: 100vw;
+}
+
+@font-face {
+  font-family: 'Keep Calm'; /* You name this whatever you want */
+  src: url('./assets/fonts/KeepCalm-Medium.woff') format('woff2'),
+       url('./assets/fonts/KeepCalm-Medium.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Helps with loading performance */
+}
