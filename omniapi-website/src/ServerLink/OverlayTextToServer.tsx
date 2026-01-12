@@ -1,4 +1,4 @@
-export const OverlayTextToServer = async(file_id:string,text:string, x_pos, y_pos, font_size:string,font:string,color:string,location:string,task_id:string)=>{
+export const OverlayTextToServer = async(file_id:string,text:string, x_pos:number, y_pos:number, font_size:number,font:string,color:string,location:string,task_id:string)=>{
     try{
         const formData = new FormData()
         formData.append("file_id", file_id)

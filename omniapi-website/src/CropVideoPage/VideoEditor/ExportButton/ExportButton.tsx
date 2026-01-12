@@ -69,7 +69,7 @@ const ExportButton = ({setStartExport,exportValues, exportOptions}:Props) =>{
                     file_id = await TextOverlayFunction(file_id,
                         exportValues.textProps.text, 
                         Math.round(exportValues.textProps.x * ratioX), 
-                        Math.round(exportValues.textProps.y * ratioY), 
+                        Math.round((exportValues.textProps.y) * ratioY), 
                         exportValues.textProps.fontSize ,
                         exportValues.textProps.fontFamily,
                         exportValues.textProps.fill,

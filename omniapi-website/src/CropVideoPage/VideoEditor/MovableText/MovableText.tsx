@@ -1,11 +1,9 @@
 "use client"
-import { Stage, Layer, Text, Rect } from "react-konva";
 import { useState, useEffect, useRef } from "react";
-import {Box, Typography} from '@mui/material'
-// Import Konva types for the ref
-import { Text as KonvaText } from "konva/lib/shapes/Text";
-import { X } from "@mui/icons-material";
+import Draggable from 'react-draggable';
 import { getLineHeight } from "./LineHeight";
+
+// Keep your exact Types
 type Props = {
   dimensions: { width: number; height: number };
   videoRatio: { width: number; height: number };
@@ -35,165 +33,132 @@ type Props = {
 
 const EditableText = ({ dimensions, textProp, setTextProp, videoRatio }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [prevDimension, setPrevDimension] = useState(dimensions)
-  // Use the specific KonvaText type for the ref
-  const textRef = useRef<KonvaText>(null);
-  const [localText, setLocalText] = useState({
-    x: textProp.x,
-    y: textProp.y,
-    text: 'text',
-    fontSize:
-      textProp.fontSize *
-      Math.min(dimensions.width / videoRatio.width, dimensions.height / videoRatio.height),
-    fontFamily: textProp.fontFamily,
-    fill: textProp.fill,
-  });
+  
+  // React-Draggable requires a ref for the element it drags
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  // Sync props into local state
+  // ------------------------------------------------------------------
+  // 1. EXACT FONT SIZE CALCULATION (Preserved from your code)
+  // ------------------------------------------------------------------
+  const calculateFontSize = () => {
+     const ratioX = dimensions.width / videoRatio.width;
+     const ratioY = dimensions.height / videoRatio.height;
+     // This math matches your original Konva logic exactly
+     return Math.round(textProp.fontSize * Math.min(ratioX, ratioY));
+  };
+  const currentFontSize = calculateFontSize();
+
+  // ------------------------------------------------------------------
+  // 2. MEASURE TEXT SIZE (Replaces Konva's auto-measurement)
+  // ------------------------------------------------------------------
   useEffect(() => {
-    const ratioX = dimensions.width / videoRatio.width
-    const ratioY =  dimensions.height / videoRatio.height
-    const node = textRef.current;
-    const textWidth = node?.width()
-    const textHeight = node?.height()
-    const newX = Math.min(
-        Math.max(localText.x, - textWidth/2),            // left bound
-        dimensions.width - textWidth/2        // right bound
-      );
+    if (nodeRef.current) {
+      const width = nodeRef.current.offsetWidth;
+      const height = nodeRef.current.offsetHeight;
 
-    const newY = Math.min(
-      Math.max(localText.y, -textHeight/2),            // top bound
-      dimensions.height - textHeight/2        // bottom bound
-    );
-    console.log(textProp.fontSize,Math.round(textProp.fontSize  *
-        Math.min(ratioX, ratioY)))
-    setLocalText((prev)=>({...prev,
-      x:newX,
-      y:newY,
-      fontSize:
-        Math.round(textProp.fontSize *
-        Math.min(ratioX, ratioY)),
-      fontFamily: textProp.fontFamily,
-      fill: textProp.fill,
-    }));
-    if (prevDimension.width !== dimensions.width || prevDimension.height !== dimensions.height) {
-    setPrevDimension({ width: dimensions.width, height: dimensions.height });
-  }
-  }, [textProp, dimensions, videoRatio]); 
-  useEffect(()=>{
-    setLocalText((prev)=>({...prev, x: textProp.x, y:textProp.y}))
-  },[textProp.x || textProp.y])
-  useEffect(() => { 
-    if (textRef.current) {
-      const box = textRef.current
-       setTextProp((prev) => 
-        ({ ...prev, 
-          textWidth: box.width(),
-           textHeight: box.height()
-          })) } },
-            [localText.fontSize, localText.text, localText.fontFamily]);
-  const handleDbl = () => {
-    setIsEditing(true);
-    setTimeout(() => inputRef.current?.focus(), 0);
+      // Only update if dimensions differ to prevent infinite loops
+      if (width !== textProp.textWidth || height !== textProp.textHeight) {
+        setTextProp((prev) => ({
+          ...prev,
+          textWidth: width,
+          textHeight: height,
+        }));
+      }
+    }
+  }, [
+    textProp.text, 
+    currentFontSize, 
+    textProp.fontFamily,
+    // Add these dependencies to ensure we remeasure if the window resizes
+    dimensions.width, 
+    dimensions.height 
+  ]);
+
+  // ------------------------------------------------------------------
+  // 3. HANDLERS
+  // ------------------------------------------------------------------
+  const handleStop = (_e: any, data: { x: number; y: number }) => {
+    setTextProp((prev) => ({ ...prev, x: data.x, y: data.y }));
   };
 
-  const finishEditing = () => {
-    setLocalText((prev) => ({ ...prev, text: inputRef.current?.value || prev.text }));
-    setTextProp((prev)=>({...prev, text: inputRef.current?.value || prev.text}))
+  const finishEditing = (e: React.FocusEvent<HTMLInputElement> | React.KeyboardEvent) => {
+    // If triggered by Enter key or Blur, save and close
+    const target = e.target as HTMLInputElement;
+    setTextProp((prev) => ({ ...prev, text: target.value }));
     setIsEditing(false);
   };
 
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-      <Stage
-        width={dimensions.width}
-        height={dimensions.height}
-        style={{ position: "absolute", inset: 0, zIndex: 5, pointerEvents: "auto" }}
+    <div
+      style={{
+        position: "absolute",
+        width: dimensions.width,
+        height: dimensions.height,
+        top: 0,
+        left: 0,
+        zIndex: 20, // High z-index to sit on top
+        pointerEvents: "none", // <--- KEY: Allows clicks to pass through empty space
+        overflow: "hidden", // Clips text if it goes outside the video area
+      }}
+    >
+      <Draggable
+        nodeRef={nodeRef}
+        position={{ x: textProp.x, y: textProp.y }}
+        onStop={handleStop}
+        disabled={isEditing}
+        // "bounds='parent'" automatically handles the clamping logic 
+        // that you were doing manually with Math.min/Math.max
+        bounds="parent" 
       >
-        
-
-        
-        <Layer>
-          {!isEditing && (
-            
-            <Text
-              lineHeight={getLineHeight(localText.fontFamily)}
-              ref={textRef}
-              {...localText}
-              draggable
-              dragBoundFunc={(pos) => {
-                const node = textRef.current;
-                if (!node) {
-                  return pos;
-                }
-
-                const stageWidth = dimensions.width;
-                const stageHeight = dimensions.height;
-
-                // Get the actual rendered width and height of the text
-                const textWidth = node.width();
-                const textHeight = node.height();
-
-                // Clamp the X position
-                const newX = Math.max(
-                  0 - textWidth/2, // Minimum X (left bound)
-                  Math.min(pos.x, stageWidth - textWidth + textWidth/2) // Maximum X (right bound)
-                );
-
-                // Clamp the Y position
-                const newY = Math.max(
-                  0 - textHeight/2, // Minimum Y (top bound)
-                  Math.min(pos.y, stageHeight - textHeight + textHeight /2) // Maximum Y (bottom bound)
-                );
-
-                // Return the clamped position
-                return {
-                  x: newX,
-                  y: newY,
-                };
-              }}
-              onDblClick={handleDbl}
-              onDblTap={handleDbl}
-              onDragEnd={(e) => {
-                const x = e.target.x();
-                const y = e.target.y();
-                setLocalText((p) => ({ ...p, x, y }));
-                setTextProp((p) => ({ ...p, x, y }));
-              }}
-            />
-            
-          )}
-        </Layer>
-      </Stage>
-      <Box sx={{position:'absolute' ,border:'solid 2px red', zIndex:100, left:localText.x, top:localText.y, width:textRef.current?.width(), height: textRef.current?.height()}}/>
-      {isEditing && (
-        <input
-          ref={inputRef}
-          defaultValue={localText.text}
+        <div
+          ref={nodeRef}
+          onDoubleClick={() => setIsEditing(true)}
           style={{
             position: "absolute",
-            top: localText.y,
-            left: localText.x,
-            fontSize: localText.fontSize,
-            fontFamily: localText.fontFamily,
-            color: localText.fill,
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            zIndex: 10,
-            // Ensure the input has pointer events
-            pointerEvents: "auto",
+            display: "inline-block", // Wraps tightly around the text
+            cursor: isEditing ? "text" : "move",
+            pointerEvents: "auto", // <--- KEY: Re-enables clicking JUST for the text
+            
+            // Apply your styles
+            fontSize: currentFontSize,
+            fontFamily: textProp.fontFamily,
+            color: textProp.fill,
+            lineHeight: getLineHeight(textProp.fontFamily) || 1, 
+            whiteSpace: "nowrap", // Prevents text from wrapping to next line
+            userSelect: "none",
+            
+            // Visual helper: dashed box when editing
+            border: isEditing ? "1px dashed rgba(255,255,255,0.5)" : "1px solid transparent",
+            padding: "2px", // Slight padding for easier grabbing
           }}
-          onBlur={finishEditing}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") finishEditing();
-            if (e.key === "Backspace") {
-                e.stopPropagation();
-              }
-          }}
-        />
-      )}
+        >
+          {isEditing ? (
+            <input
+              autoFocus
+              defaultValue={textProp.text}
+              onBlur={finishEditing}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") finishEditing(e);
+                e.stopPropagation(); // Stop event bubbling
+              }}
+              style={{
+                // Styles to make the input look exactly like the text
+                background: "transparent",
+                color: "inherit",
+                border: "none",
+                outline: "none",
+                font: "inherit",
+                padding: 0,
+                margin: 0,
+                // Simple hack to make input width grow with text
+                minWidth: `${Math.max(textProp.text.length, 1)}ch` 
+              }}
+            />
+          ) : (
+            textProp.text
+          )}
+        </div>
+      </Draggable>
     </div>
   );
 };

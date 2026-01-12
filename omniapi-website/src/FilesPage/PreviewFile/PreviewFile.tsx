@@ -11,7 +11,7 @@ const PreviewFile=({previewValues, handleClosePreview}:Props)=>{
         const type = previewValues.type.toUpperCase()
         if (image_types.includes(type)){
             return(
-                <img src={previewValues.objecURL} alt={previewValues.name} style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}/>
+                <img src={previewValues.objecURL} alt={previewValues.name} style={{maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}/>
             )
         }
         else if (video_types.includes(type)){
@@ -41,7 +41,9 @@ const PreviewFile=({previewValues, handleClosePreview}:Props)=>{
                     </Box>
                 </DialogTitle>
                 <DialogContent>
-                    {renderContent()}
+                    <Box sx={{display:'flex', justifyContent:'center', alignItems:'center'}}>
+                        {renderContent()}
+                    </Box>
                 </DialogContent>
             </Dialog>
         </>

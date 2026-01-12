@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 import boto3
 from PIL import Image
 from pdf2image import convert_from_path
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from celery.schedules import crontab
 from fastapi.responses import StreamingResponse
@@ -24,12 +25,13 @@ from app.fontPaths import FONT_MAP
 from app.database import get_sync_session, engine
 import ffmpeg
 from app.models.job import Job, JobStatus
+load_dotenv()
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
-S3_ENDPOINT_URL = "http://10.0.0.21:3900"
-AWS_ACCESS_KEY_ID = "GK2278bf8785a6d66fdda7b1dd"
-AWS_SECRET_ACCESS_KEY = "b7cefa63d6d012c63b4224bdde2999f3e5467f955248eb2034f14bd534d04bfc"
+S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://10.0.0.21:3900")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 BUCKET_NAME = "omniapi"
 MULTIPART_PREFIX = "upload"
 S3_CONFIG = Config(
@@ -447,6 +449,7 @@ def cut_and_combine(file_id, start_times, end_times, job_id, cut_video_id, locat
             name=file_name,
             size=len(file_bytes),
             content_type=to_type,
+            location='editor'
         )
         db.add(file_table)
         job.status = JobStatus.finished
@@ -547,7 +550,8 @@ def crop_video(file_id, width, height, x, y, job_id, crop_id, location):
             id=crop_id,
             name=file_name,
             size=len(file_bytes),
-            content_type=file_type
+            content_type=file_type,
+            location = "editor"
         ))
 
         job.status = JobStatus.finished
@@ -713,7 +717,8 @@ def overlay_text(file_id, job_id, text, text_id, x_pos, y_pos, font_size, font, 
                 id=text_id,
                 name=new_name,
                 size=len(file_bytes),
-                content_type=original.content_type
+                content_type=original.content_type,
+                location ="editor"
             )
         )
     except Exception as e:
@@ -780,9 +785,11 @@ def cleanup_old_jobs():
         job_stmt = select(Job).where(Job.created_on <= cutoff )
         jobs = session.exec(job_stmt).all()
         for job in jobs:
-            session.delete(job)
+            if (job):
+                print(f"Job deleted {job.id}")
+                session.delete(job)
         session.commit()
-        print(f"Job deleted {job.id}")
+
 
 def get_table_worker(ids):
     with Session(engine) as session:
@@ -860,7 +867,8 @@ def getFilesFromLink(link):
                 "name": file.name,
                 "size": file.size,
                 "id": file.id,
-                "type": file.content_type
+                "type": file.content_type,
+                "location": file.location
             })
     return files
 
@@ -892,7 +900,7 @@ def checkLinkActive(link):
 
 def create_url_end(fileID):
     try:
-        key = f"share/{fileID}"
+        
         with Session(engine) as session:
             stmt =  select(shareLink).where(shareLink.file_id == fileID )
             results = session.exec(stmt).first()
@@ -900,7 +908,8 @@ def create_url_end(fileID):
             stmt =  select(File_Table).where(File_Table.id == fileID )
             fileresults = session.exec(stmt).first()
         filename =fileresults.name
-        
+        location = fileresults.location
+        key = f"{location}/{fileID}"
         now = datetime.now()
         delta = results.expiration -now
         expires_in  = int(delta.total_seconds())

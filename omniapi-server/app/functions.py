@@ -45,7 +45,7 @@ def handle_upload(file, location, session):
     # 3. DB Operations
     job = Job(id=job_id, task_id=task_id, status=JobStatus.processing, operation="uploading_file")
     file_type = str(file.filename).split(".")[-1]
-    file_table = File_Table(id=file_id, name=file.filename, size=file_size, content_type=file_type)
+    file_table = File_Table(id=file_id, name=file.filename, size=file_size, content_type=file_type, location = location)
 
     session.add(job)
     session.add(file_table)
@@ -162,6 +162,7 @@ def handle_compress(file_id, type_file, level, zip_flag, g_zip_flag, file, sessi
             name=file.filename,
             size=len(file.file.read()),
             content_type=file_type
+
         ))
         session.commit()
 
@@ -191,13 +192,14 @@ def handle_convert(file_id, file_type, to_type,location, task_id,session):
     job_id = str(uuid4())         # ID for the conversion job
     converted_id = str(uuid4())   # ID for converted file
     curr_file = session.get(File_Table, file_id)
-    file_name = str(curr_file.name).rsplit(".", 1)[0] + '_cut'
+    file_name = str(curr_file.name).rsplit(".", 1)[0] + '_converted.'+ to_type.lower()
     session.add(Job(id=job_id, task_id= task_id,status=JobStatus.processing, operation="convert_file"))
     file = File_Table(
         id=f"{converted_id}",
         name=file_name,
         size=0,
         content_type=to_type,
+        location = "convert"
     )
     session.add(file)
     print("CONVERT ONLY START")

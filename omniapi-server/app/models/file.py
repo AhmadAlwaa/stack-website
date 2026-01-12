@@ -8,3 +8,4 @@ class File_Table(SQLModel, table=True):
     size: int
     content_type: str
     created_on: datetime = Field(default_factory=datetime.utcnow)
+    location: str

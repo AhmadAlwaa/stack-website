@@ -44,10 +44,10 @@ const FilesPage = ()=>{
             return file + ' B';
         }
     }
-    const handlePreiew = async (file_id:string, fileName:string, type:string)=>{
+    const handlePreiew = async (file_id:string, fileName:string, type:string, location:string)=>{
         try{
             setLoading({loading:true, message:'loading file...'})
-            const response = await GetFileFromServer(file_id, "share")
+            const response = await GetFileFromServer(file_id, location)
             if (!response ) return 
             const blob = await response.blob()
             let finalBlob = blob
@@ -66,10 +66,11 @@ const FilesPage = ()=>{
     const handleClosePreview = ()=>{
         setPreviewValues((prev)=>({...prev, objecURL:'', open:false}))
     }
-    const handleDownloadFront=async(fileID:string, fileName:string)=>{
+    const handleDownloadFront=async(fileID:string, fileName:string, location:string)=>{
+        console.log(fileID, fileName, location)
         try{
             setLoading({loading:true, message:'downloading file...'})
-            await HandleDownload(fileID, fileName)
+            await HandleDownload(fileID, fileName,location)
 
         }catch(error){
             console.error("error downloading:",error)
@@ -167,7 +168,7 @@ const FilesPage = ()=>{
                     {/* COL 3: Button */}
                     <TableCell align="center" sx={{ borderBottom: "1px solid rgba(185, 130, 224, 0.53)", padding: 0 }}>
                         <Box sx={{display:'flex', flexDirection:'row', gap:3}}>
-                            <IconButton onClick={()=>handlePreiew(file.id, file.name, file.type)}
+                            <IconButton onClick={()=>handlePreiew(file.id, file.name, file.type, file.location)}
                                 size="small" 
                                 sx={{ color: "rgba(222, 222, 222, 1)", "&:focus": {outline:'none'} }}
                             >
@@ -178,7 +179,7 @@ const FilesPage = ()=>{
                             >
                                 <LinkIcon fontSize="small" />
                             </IconButton>
-                            <IconButton onClick={()=>handleDownloadFront(file.id, file.name)}
+                            <IconButton onClick={()=>handleDownloadFront(file.id, file.name, file.location)}
                                 size="small" 
                                 sx={{ color: "rgba(222, 222, 222, 1)", "&:focus": {outline:'none'} }}
                             >

@@ -54,10 +54,10 @@ const TextMenu = ({ textProp, setTextProp, dimensions, exportOptions, setExportO
           x: (dimensions.width - textProp.textWidth) / 2,
           y: (dimensions.height - textProp.textHeight) / 2,
         },
-        topleft: { x: 0, y: -textProp.textHeight/7 },
-        topright: { x: dimensions.width - textProp.textWidth, y: -textProp.textHeight/7},
-        bottomleft: {x:0, y:dimensions.height - textProp.textHeight +textProp.textHeight/7},
-        bottomright: {x:dimensions.width - textProp.textWidth, y:dimensions.height - textProp.textHeight + textProp.textHeight/7},
+        topleft: { x: -textProp.textWidth/100, y: -textProp.textHeight/3.5 },
+        topright: { x: dimensions.width - textProp.textWidth + textProp.textWidth/55, y: -textProp.textHeight/3.5},
+        bottomleft: {x:0, y:dimensions.height - textProp.textHeight + textProp.textHeight/5.5},
+        bottomright: {x:dimensions.width - textProp.textWidth, y:dimensions.height - textProp.textHeight + textProp.textHeight/5.5},
         middleleft: {x:0, y:(dimensions.height - textProp.textHeight)/2},
         middleright: {x:dimensions.width- textProp.textWidth, y:(dimensions.height - textProp.textHeight)/2}
       }
